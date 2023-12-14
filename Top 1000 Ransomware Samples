@@ -1,0 +1,60 @@
+import requests
+import pandas as pd
+
+def fetch_all_ransomware_samples(api_key, limit_per_page=100, total_entries=10000):
+    url = "https://mb-api.abuse.ch/api/v1/"
+    
+    all_samples = []
+    page = 1
+
+    while len(all_samples) < total_entries:
+        data = {
+            'query': 'get_taginfo',
+            'tag': 'ransomware',
+            'limit': min(limit_per_page, total_entries - len(all_samples)),
+            'page': page,
+        }
+
+        headers = {'API-KEY': api_key}
+
+        try:
+            response = requests.post(url, data=data, headers=headers, timeout=15)
+            response.raise_for_status()
+            samples = response.json().get("data", [])
+
+            if not samples:
+                break  # No more data, break the loop
+
+            all_samples.extend(samples)
+            page += 1
+        except requests.exceptions.HTTPError as errh:
+            print(f"HTTP Error: {errh}")
+            break
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error Connecting: {errc}")
+            break
+        except requests.exceptions.RequestException as err:
+            print(f"Request Exception: {err}")
+            break
+
+    return all_samples[:total_entries]  # Ensure we return exactly total_entries
+
+def main():
+    api_key = "f30eb1b0850217784f2291702368c27e"  # Replace with your actual API key
+
+    ransomware_samples = fetch_all_ransomware_samples(api_key, total_entries=1000)
+
+    if ransomware_samples:
+        # Create a DataFrame from the list of dictionaries
+        df = pd.DataFrame(ransomware_samples)
+
+        # Save the DataFrame to an Excel file
+        excel_file = "newransomware_samples.xlsx"
+        df.to_excel(excel_file, index=False)
+
+        print(f"Data exported to {excel_file}")
+    else:
+        print("No samples found.")
+
+if __name__ == "__main__":
+    main()
