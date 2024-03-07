@@ -40,7 +40,7 @@ def fetch_all_ransomware_samples(api_key, limit_per_page=100, total_entries=1000
     return all_samples[:total_entries]  # Ensure we return exactly total_entries
 
 def main():
-    api_key = "f30eb1b0850217784f2291702368c27e"  # Replace with your actual API key
+    api_key = "xxxxxxxxxxxxx"  # Replace with your actual API key
 
     ransomware_samples = fetch_all_ransomware_samples(api_key, total_entries=1000)
 
